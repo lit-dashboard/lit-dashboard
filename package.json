@@ -2,11 +2,11 @@
   "name": "@lit-dashboard/lit-dashboard",
   "version": "1.0.1",
   "description": "lit-dashboard",
-  "main": "dist/index.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel src --out-dir dist",
-    "start": "babel src --watch --out-dir dist"
+    "build": "babel src --out-dir ./",
+    "start": "babel src --watch --out-dir ./"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
     "lit-element": "^2.2.1",
     "lodash": "^4.17.15",
     "path-webpack": "0.0.3",
-    "pwa-helpers": "^0.9.1"
+    "pwa-helpers": "^0.9.1",
+    "redux": "^4.0.5"
   }
 }

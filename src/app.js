@@ -11,6 +11,14 @@ export const getSourceManager = (providerName) => {
   return window.dashboardApp.getManager(providerName);
 };
 
+export const removeSourceManager = (providerName) => {
+  window.dashboardApp.removeSourceManager(providerName);
+};
+
+export const normalizeKey = (key) => {
+  return window.dashboardApp.normalizeKey(key);
+};
+
 export const addSourceProviderType = (constructor) => {
   return window.dashboardApp.addSourceProviderType(constructor);
 };
@@ -33,10 +41,6 @@ export const getSourceProviderNames = () => {
 
 export const hasSourceProvider = (providerName) => {
   return window.dashboardApp.hasSourceProvider(providerName);
-};
-
-export const getStore = () => {
-  return window.dashboardApp.store;
 };
 
 export const onEvent = (eventName, callback) => {

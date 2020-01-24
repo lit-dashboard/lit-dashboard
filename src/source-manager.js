@@ -1,9 +1,7 @@
 import { sourcesChanged } from './actions';
 import { forEach } from 'lodash';
-import { 
-  getStore,
-  addSourceProvider
-} from './app';
+import store from './store';
+import { addSourceProvider } from './app';
 
 export default class SourceManager {
 
@@ -37,7 +35,7 @@ export default class SourceManager {
   }
 
   getSource(key = '') {
-    let sourcesRoot = getStore().getState().sources[this.providerName];
+    let sourcesRoot = store.getState().sources[this.providerName];
 
     if (typeof sourcesRoot === 'undefined') {
       return null;
@@ -77,9 +75,9 @@ export default class SourceManager {
       if ('last' in values)
         lastUpdates[key] = values.last;
     });
-    getStore().dispatch(sourcesChanged(this.providerName, firstUpdates));
+    store.dispatch(sourcesChanged(this.providerName, firstUpdates));
     if (Object.keys(lastUpdates).length > 0) {
-      getStore().dispatch(sourcesChanged(this.providerName, lastUpdates));
+      store.dispatch(sourcesChanged(this.providerName, lastUpdates));
     }
   
     this.sourceUpdates = {};

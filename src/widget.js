@@ -1,5 +1,5 @@
 import { LitElement } from 'lit-element';
-import { getStore } from './app';
+import store from './store';
 import { isNull, forEach } from 'lodash';
 import { connect } from 'pwa-helpers';
 import { 
@@ -8,11 +8,11 @@ import {
   getSourceProvider
 } from './app';
 
-export default class Widget extends connect(getStore())(LitElement) {
+export default class Widget extends connect(store)(LitElement) {
 
   constructor() {
     super();
-    this.widgetConfig = getStore().getState().widgets.registered[this.nodeName.toLowerCase()];
+    this.widgetConfig = store.getState().widgets.registered[this.nodeName.toLowerCase()];
     if (!this.widgetConfig) {
       return;
     }

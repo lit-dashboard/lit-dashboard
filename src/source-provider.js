@@ -1,4 +1,12 @@
-import { isString, isNumber, isBoolean, isArray } from 'lodash';
+import { 
+  isString, 
+  isNumber, 
+  isBoolean, 
+  isArray, 
+  isNull,
+  kebabCase
+} from 'lodash';
+import ProviderSettings from './provider-settings';
 
 export default class SourceProvider {
   
@@ -19,7 +27,18 @@ export default class SourceProvider {
   }
 
   get settingsElementName() {
-    return getSettingsElementName(this.constructor);
+    const { settingsElement, typeName } = this.constructor;
+    if (isNull(settingsElement) || isNull(typeName)) {
+      return null;
+    }
+    const isProviderSettings = 
+      settingsElement.prototype instanceof ProviderSettings;
+
+    if (!isProviderSettings) {
+      return null;
+    }
+
+    return kebabCase(typeName) + '-settings'; 
   }
 
   onSettingsChange(settings) {}
