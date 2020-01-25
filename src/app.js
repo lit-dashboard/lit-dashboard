@@ -1,14 +1,14 @@
 
 export const addSourceManager = (type, name, settings) => {
-  window.dashboardApp.addManager(type, name, settings);
+  window.dashboardApp.addSourceManager(type, name, settings);
 };
 
 export const hasSourceManager = (providerName) => {
-  return window.dashboardApp.hasManager(providerName);
+  return window.dashboardApp.hasSourceManager(providerName);
 };
 
 export const getSourceManager = (providerName) => {
-  return window.dashboardApp.getManager(providerName);
+  return window.dashboardApp.getSourceManager(providerName);
 };
 
 export const removeSourceManager = (providerName) => {
@@ -57,4 +57,8 @@ export const getPageX = () => {
 
 export const getPageY = () => {
   return window.dashboardApp.getPageY();
+};
+
+export const registerWidget = (tagName, config) => {
+  return window.dashboardApp.registerWidget(tagName, config);
 };

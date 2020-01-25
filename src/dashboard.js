@@ -1,6 +1,6 @@
 import { LitElement } from 'lit-element';
 import { isArray } from 'lodash';
-import { addManager } from './app';
+import { addSourceManager } from './app';
 import { getProviderSettings } from './storage';
 
 export default class Dashboard extends LitElement {
@@ -17,7 +17,7 @@ export default class Dashboard extends LitElement {
     }
 
     for (let { type, name, settings } of providers) {
-      addManager(type, name, {
+      addSourceManager(type, name, {
         ...settings,
         ...getProviderSettings(name)
       });
