@@ -31,6 +31,10 @@ export function registerWidget(widgetType, config = {}) {
         sourceType: {
           type: String,
           attribute: false
+        },
+        widgetId: {
+          type: String,
+          attribute: 'widget-id'
         }
       }
     }

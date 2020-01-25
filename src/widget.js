@@ -2,16 +2,20 @@ import { LitElement } from 'lit-element';
 import store from './store';
 import { isNull, forEach } from 'lodash';
 import { connect } from 'pwa-helpers';
+import toastr from 'toastr';
 import { 
   hasSourceManager,
   getSourceManager,
-  getSourceProvider
+  getSourceProvider,
+  triggerEvent,
 } from './app';
+import { getWidgetSource } from './storage';
 
 export default class Widget extends connect(store)(LitElement) {
 
   constructor() {
     super();
+
     this.widgetConfig = store.getState().widgets.registered[this.nodeName.toLowerCase()];
     if (!this.widgetConfig) {
       return;
@@ -72,7 +76,7 @@ export default class Widget extends connect(store)(LitElement) {
           this._dispatchSourceKeyChange();
           this.sourceValue = { __generated__: true };
         } else if (!this.isAcceptedType(source.__type__)) {
-          dashboard.toastr.error(`
+          toastr.error(`
             Can't add source to widget with ID '${widgetId}'. Widgets of type '${this.widgetConfig.label}' 
             doesn't accept type '${source.__type__}'. Accepted types are '${this.widgetConfig.acceptedTypes.join(', ')}'
           `);
@@ -82,7 +86,7 @@ export default class Widget extends connect(store)(LitElement) {
           this.requestUpdate('sourceKey', oldValue);
           this._dispatchSourceKeyChange();
           this.sourceValue = this._generateSourceValue(source);
-          dashboard.toastr.success(`
+          toastr.success(`
             Successfully added source '${value}' to widget
             with ID '${widgetId}'
           `);
@@ -95,7 +99,7 @@ export default class Widget extends connect(store)(LitElement) {
     this.sourceManager = null;
     this.sourceKey = null;
     this.sourceType = null;
-    dashboard.events.trigger('widgetAdded', this);
+    triggerEvent('widgetAdded', this);
     this._setInitialSourceKey();
 
     const resizeObserver = new ResizeObserver(() => {
@@ -107,7 +111,7 @@ export default class Widget extends connect(store)(LitElement) {
   async _setInitialSourceKey() {
     await this.updateComplete;
     const widgetId = this.getAttribute('widget-id');
-    const source = dashboard.storage.getWidgetSource(widgetId);
+    const source = getWidgetSource(widgetId);
     if (source) {
       this.sourceProvider = source.sourceProvider;
       this.sourceKey = source.key;

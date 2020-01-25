@@ -1,7 +1,7 @@
 import { sourcesChanged } from './actions';
 import { forEach } from 'lodash';
 import store from './store';
-import { addSourceProvider } from './app';
+import { addSourceProvider, normalizeKey } from './app';
 
 export default class SourceManager {
 

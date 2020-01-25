@@ -8,6 +8,7 @@ import _SourceManager from './source-manager';
 import _SourceProvider from './source-provider';
 import * as _storage from './storage';
 import _Widget from './widget';
+import _toastr from 'toastr';
 
 export const actions = _actions;
 export const store = _store;
@@ -19,4 +20,5 @@ export const SourceManager = _SourceManager;
 export const SourceProvider = _SourceProvider;
 export const storage = _storage;
 export const Widget = _Widget;
+export const toastr = _toastr;
 export * from 'lit-element';

@@ -31,6 +31,7 @@
     "lodash": "^4.17.15",
     "path-webpack": "0.0.3",
     "pwa-helpers": "^0.9.1",
-    "redux": "^4.0.5"
+    "redux": "^4.0.5",
+    "toastr": "^2.1.4"
   }
 }

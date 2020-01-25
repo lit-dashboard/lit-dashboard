@@ -32,7 +32,8 @@ export default class SourceProvider {
       return null;
     }
     const isProviderSettings = 
-      settingsElement.prototype instanceof ProviderSettings;
+      Object.getPrototypeOf(settingsElement.constructor).name === 'ProviderSettings';
+
 
     if (!isProviderSettings) {
       return null;
