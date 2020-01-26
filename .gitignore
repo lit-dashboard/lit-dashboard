@@ -104,14 +104,14 @@ dist
 .tern-port
 
 # built files in lit-dashboard
-actions.js
-app.js
-dashboard.js
-index.js
-provider-settings.js
-reducer.js
-source-manager.js
-source-provider.js
-storage.js
-store.js
-widget.js
+/actions.js
+/app.js
+/dashboard.js
+/index.js
+/provider-settings.js
+/reducer.js
+/source-manager.js
+/source-provider.js
+/storage.js
+/store.js
+/widget.js
