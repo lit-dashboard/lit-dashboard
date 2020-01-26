@@ -75,9 +75,12 @@ export default class SourceManager {
       if ('last' in values)
         lastUpdates[key] = values.last;
     });
+
     store.dispatch(sourcesChanged(this.providerName, firstUpdates));
     if (Object.keys(lastUpdates).length > 0) {
-      store.dispatch(sourcesChanged(this.providerName, lastUpdates));
+      setTimeout(() => {
+        store.dispatch(sourcesChanged(this.providerName, lastUpdates));
+      });
     }
   
     this.sourceUpdates = {};
