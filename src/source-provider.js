@@ -49,13 +49,15 @@ export default class SourceProvider {
 
   getType(value) {
     if (isString(value)) {
-      return 'String';
+      return 'string';
     } else if (isNumber(value)) {
-      return 'Number';
+      return 'number';
     } else if (isBoolean(value)) {
-      return 'Boolean';
+      return 'boolean';
     } else if (isArray(value)) {
       return 'Array';
+    } else if (isNull(value)) {
+      return 'null';
     }
     return null;
   }

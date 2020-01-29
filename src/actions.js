@@ -24,14 +24,6 @@ export function registerWidget(widgetType, config = {}) {
           attribute: 'source-key',
           reflect: true
         },
-        sourceValue: {
-          type: Object,
-          attribute: false
-        },
-        sourceType: {
-          type: String,
-          attribute: false
-        },
         widgetId: {
           type: String,
           attribute: 'widget-id'
@@ -44,7 +36,6 @@ export function registerWidget(widgetType, config = {}) {
     class: null,
     label: widgetType,
     category: 'Unknown',
-    acceptedTypes: [],
     image: '',
     ...config
   };

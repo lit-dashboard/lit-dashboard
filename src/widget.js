@@ -2,12 +2,13 @@ import { LitElement } from 'lit-element';
 import store from './store';
 import { isNull, forEach } from 'lodash';
 import { connect } from 'pwa-helpers';
-import toastr from 'toastr';
 import { 
   hasSourceManager,
   getSourceManager,
   getSourceProvider,
   triggerEvent,
+  notifyError,
+  notifySuccess
 } from './app';
 import { getWidgetSource } from './storage';
 
@@ -21,23 +22,53 @@ export default class Widget extends connect(store)(LitElement) {
       return;
     }
 
-    Object.defineProperty(this, 'sourceValue', {
-      get() {
-        return this._sourceValue;
-      },
-      set(value) {
-        if (typeof value === 'object' && '__generated__' in value) {
-          const oldValue = this._value;
-          this._sourceValue = value;
-          this.requestUpdate('sourceValue', oldValue);
-          this._dispatchSourceValueChange();
-        } else {
-          const sourceProvider = getSourceProvider(this.sourceProvider);
-          if (typeof this.sourceKey === 'string' && sourceProvider) {
-            sourceProvider.updateFromDashboard(this.sourceKey, value);
-          }
-        }
+    forEach(this.constructor.properties, (property, name) => {
+      if (['sourceProvider', 'sourceKey', 'widgetId'].includes(name)) {
+        return;
       }
+
+      const { type, attribute, reflect, structure } = property;
+
+      if (attribute === false || !reflect) {
+        return;
+      }
+
+      Object.defineProperty(this, name, {
+        get() {
+          return this[`_${name}`];
+        },
+        set(value) {
+          const sourceProvider = getSourceProvider(this.sourceProvider);
+
+          if (typeof value === 'object' && value.__fromSource__) {
+            const oldValue = this._value;
+            this[`_${name}`] = value.__value__;
+            this.requestUpdate(name, oldValue);
+            this._dispatchPropertyChange(name, oldValue, value.__value__);
+            return;
+          } else if (typeof this.sourceKey === 'string' && sourceProvider) {
+            const source = this.sourceManager.getSource(this.sourceKey);
+            if (source) {
+              const propSource = source.__sources__[name];
+
+              if (typeof propSource === 'undefined') {
+                if (this.constructor.properties[name].primary && source.__fromProvider__) {
+                  sourceProvider.updateFromDashboard(this.sourceKey, value);
+                  return;
+                }
+              } else if (propSource.__fromProvider__) {
+                sourceProvider.updateFromDashboard(propSource.__key__, value);
+                return;
+              }
+            }
+          }
+
+          const oldValue = this._value;
+          this[`_${name}`] = value;
+          this.requestUpdate(name, oldValue);
+          this._dispatchPropertyChange(name, oldValue, value);
+        }
+      });
     });
 
     Object.defineProperty(this, 'sourceProvider', {
@@ -70,35 +101,24 @@ export default class Widget extends connect(store)(LitElement) {
         const widgetId = this.getAttribute('widget-id');
 
         if (isNull(source)) {
-          this.sourceType = null;
           this._sourceKey = value;
           this.requestUpdate('sourceKey', oldValue);
           this._dispatchSourceKeyChange();
-          this.sourceValue = { __generated__: true };
-        } else if (!this.isAcceptedType(source.__type__)) {
-          toastr.error(`
-            Can't add source to widget with ID '${widgetId}'. Widgets of type '${this.widgetConfig.label}' 
-            doesn't accept type '${source.__type__}'. Accepted types are '${this.widgetConfig.acceptedTypes.join(', ')}'
-          `);
         } else {
-          this.sourceType = source.__type__;
           this._sourceKey = value;     
           this.requestUpdate('sourceKey', oldValue);
           this._dispatchSourceKeyChange();
-          this.sourceValue = this._generateSourceValue(source);
-          toastr.success(`
-            Successfully added source '${value}' to widget
-            with ID '${widgetId}'
+          this._setPropsFromSource(source);
+          notifySuccess(`
+            Successfully added source to widget with ID '${widgetId}'.
           `);
         }
       }
     });
 
-    this.sourceValue = { __generated__: true };
     this.sourceProvider = null;
     this.sourceManager = null;
     this.sourceKey = null;
-    this.sourceType = null;
     triggerEvent('widgetAdded', this);
     this._setInitialSourceKey();
 
@@ -129,10 +149,12 @@ export default class Widget extends connect(store)(LitElement) {
     this.dispatchEvent(event);
   }
 
-  _dispatchSourceValueChange() {
-    const event = new CustomEvent('source-value-change', {
+  _dispatchPropertyChange(property, oldValue, newValue) {
+    const event = new CustomEvent('property-change', {
       detail: {
-        sourceValue: this.sourceValue
+        property,
+        oldValue,
+        newValue
       },
       bubbles: true,
       composed: true
@@ -151,24 +173,53 @@ export default class Widget extends connect(store)(LitElement) {
     this.dispatchEvent(event);
   }
 
+  _setPropsFromSource(source) {
+    forEach(this.constructor.properties, (property, name) => {
+      if (['sourceProvider', 'sourceKey', 'widgetId'].includes(name)) {
+        return;
+      }
+
+      const { type, attribute, reflect, structure, primary } = property;
+
+      if (attribute === false || !reflect) {
+        return;
+      }
+
+      const propSource = source.__sources__[name];
+
+      if (typeof propSource === 'undefined') {
+        const value = this._generateSourceValue(source);
+        if (primary) {
+          this[name] = {
+            __fromSource__: true,
+            __value__: value
+          }
+        }
+      } else {
+        this[name] = {
+          __fromSource__: true,
+          __value__: this._generateSourceValue(propSource)
+        }
+      }
+    });
+  }
+
   _generateSourceValue(source) {
     const sourceProvider = getSourceProvider(this.sourceProvider);
     const rawValue = source.__value__;
-    const sourceType = source.__type__;
     const sources = source.__sources__;
-    let value = {};
 
-    if (sourceType === 'Boolean') {
-      value = new Boolean(rawValue);
-    } else if (sourceType === 'Number') {
-      value = new Number(rawValue);
-    } else if (sourceType === 'String') {
-      value = new String(rawValue);
-    } else if (sourceType === 'Array') {
-      value = [...rawValue];
+    if (typeof rawValue === 'boolean') {
+      return rawValue;
+    } else if (typeof rawValue === 'number') {
+      return rawValue;
+    } else if (typeof rawValue === 'string') {
+      return rawValue;
+    } else if (rawValue instanceof Array) {
+      return [...rawValue];
     }
 
-    value.__generated__ = true;
+    let value = {};
 
     forEach(sources, (source, propertyName) => {
       const sourceValue = this._generateSourceValue(source);
@@ -187,20 +238,7 @@ export default class Widget extends connect(store)(LitElement) {
 
     return value;
   }
-
-  isAcceptedType(sourceType) {
-
-    if (typeof sourceType === 'undefined') {
-      return false;
-    }
-
-    return this.widgetConfig.acceptedTypes.includes(sourceType);
-  }
   
-  hasAcceptedType() {
-    return this.isAcceptedType(this.sourceType);
-  }
-
   hasSource() {
     return !isNull(this.sourceKey) && typeof this.sourceKey !== 'undefined';
   }
@@ -213,9 +251,8 @@ export default class Widget extends connect(store)(LitElement) {
     }
 
     const source = this.sourceManager.getSource(this.sourceKey);
-    if (source && this.isAcceptedType(source.__type__)) {
-      this.sourceType = source.__type__;
-      this.sourceValue = this._generateSourceValue(source);
+    if (source) {
+      this._setPropsFromSource(source);
     }
   }
 }

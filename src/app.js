@@ -62,3 +62,11 @@ export const getPageY = () => {
 export const registerWidget = (tagName, config) => {
   return window.dashboardApp.registerWidget(tagName, config);
 };
+
+export const notifyError = (msg) => {
+  return window.dashboardApp.notifyError(msg);
+};
+
+export const notifySuccess = (msg) => {
+  return window.dashboardApp.notifySuccess(msg);
+};

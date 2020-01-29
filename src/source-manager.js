@@ -21,16 +21,14 @@ export default class SourceManager {
     clearTimeout(this.interval);
   }
 
-  updateSource(key, {value, type, name }) {
+  updateSource(key, value) {
     if (this.sourceUpdates[key] === undefined) {
       this.sourceUpdates[key] = {
-        first: { value, type, name }
+        first: value
       };
     }
     else {
-      this.sourceUpdates[key].last = {
-        value, type, name
-      };
+      this.sourceUpdates[key].last = value;
     }
   }
 

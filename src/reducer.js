@@ -79,10 +79,9 @@ const rootReducer = (state = initialState, action) => {
       if (isEmpty(newSources)) {
         newSources = {
           __normalizedKey__: undefined,
+          __fromProvider__: false,
           __key__: undefined,
           __value__: undefined,
-          __type__: undefined,
-          __name__: undefined,
           __sources__: {}
         };
       }
@@ -103,50 +102,39 @@ const rootReducer = (state = initialState, action) => {
       if (isEmpty(sourcesRoot)) {
         sourcesRoot = {
           __normalizedKey__: undefined,
+          __fromProvider__: false,
           __key__: undefined,
           __value__: undefined,
-          __type__: undefined,
-          __name__: undefined,
           __sources__: {}
         };
       }
 
-      forEach(sourceChanges, ({ value, type, name }, key) => {
+      forEach(sourceChanges, (value, key) => {
+        const keyParts = key.split('/');
         const normalizedKey = normalizeKey(key);
-        const keyParts = normalizedKey.split('/');
+        const normalizedKeyParts = normalizedKey.split('/');
 
         let sources = sourcesRoot.__sources__;
 
-        keyParts.forEach((keyPart, index) => {
+        normalizedKeyParts.forEach((keyPart, index) => {
           const inSources = keyPart in sources;
 
           if (!inSources) {
             sources[keyPart] = {
-              __normalizedKey__: undefined,
-              __key__: undefined,
+              __fromProvider__: false,
+              __normalizedKey__: normalizedKeyParts.slice(0, index + 1).join('/'),
+              __key__: keyParts.slice(0, index + 1).join('/'),
               __value__: undefined,
-              __type__: undefined,
-              __name__: undefined,
               __sources__: {}
             }
           }
 
-          if (keyParts.length - 1 === index) {
+          if (normalizedKeyParts.length - 1 === index) {
 
-            sources[keyPart].__normalizedKey__ = normalizedKey;
-            sources[keyPart].__key__ = key;
+            sources[keyPart].__fromProvider__ = true;
 
-            if (typeof key !== 'undefined') {
-              sources[keyPart].__key__ = key;
-            }
             if (typeof value !== 'undefined') {
               sources[keyPart].__value__ = value;
-            }
-            if (typeof type !== 'undefined') {
-              sources[keyPart].__type__ = type;
-            }
-            if (typeof name !== 'undefined') {
-              sources[keyPart].__name__ = name;
             }
           } else {
             sources = sources[keyPart].__sources__;
@@ -175,11 +163,10 @@ const rootReducer = (state = initialState, action) => {
         sources: {
           ...state.sources,
           [action.payload.providerName]: {
+            __fromProvider__: false,
             __normalizedKey__: undefined,
             __key__: undefined,
             __value__: undefined,
-            __type__: undefined,
-            __name__: undefined,
             __sources__: {}
           }
         }
