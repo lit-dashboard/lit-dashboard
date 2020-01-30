@@ -1,6 +1,6 @@
 import { LitElement } from 'lit-element';
 import store from './store';
-import { isNull, forEach } from 'lodash';
+import { isNull, forEach, isPlainObject } from 'lodash';
 import { connect } from 'pwa-helpers';
 import { 
   hasSourceManager,
@@ -40,7 +40,7 @@ export default class Widget extends connect(store)(LitElement) {
         set(value) {
           const sourceProvider = getSourceProvider(this.sourceProvider);
 
-          if (typeof value === 'object' && value.__fromSource__) {
+          if (isPlainObject(value) && value.__fromSource__) {
             const oldValue = this._value;
             this[`_${name}`] = value.__value__;
             this.requestUpdate(name, oldValue);
