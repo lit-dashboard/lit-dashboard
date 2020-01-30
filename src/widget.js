@@ -35,6 +35,10 @@ export default class Widget extends connect(store)(LitElement) {
 
       Object.defineProperty(this, name, {
         get() {
+          const getter = this.constructor.properties[name].get;
+          if (typeof getter === 'function') {
+            return getter.bind(this)();
+          }
           return this[`_${name}`];
         },
         set(value) {
